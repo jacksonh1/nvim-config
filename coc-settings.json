@@ -1,0 +1,9 @@
+{
+  // "coc.preferences.formatOnSaveFiletypes": ["css", "markdown", "html", "yaml",  "json"]
+  "jedi.markupKindPreferred": "plaintext"
+  // python config
+  // "python.pythonPath": "/Users/jackson/coc_python_executable",
+  // "python.linting.enabled": false,
+  // "python.linting.pylintEnabled": false
+}
+
