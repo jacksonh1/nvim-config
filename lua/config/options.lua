@@ -86,6 +86,9 @@ opt.clipboard = 'unnamedplus'
 -- Update time for plugins
 opt.updatetime = 300
 
+-- Auto-reload files changed outside of neovim
+vim.o.autoread = true
+
 -- Cursor line/column (for regular neovim)
 opt.cursorline = true
 opt.cursorcolumn = true
