@@ -90,10 +90,11 @@ local plugins = {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup {
-        ensure_installed = { "python", "lua", "vim", "bash" }, -- add more as needed
+      require("nvim-treesitter").setup {
+        ensure_installed = { "python", "lua", "vim", "bash" },
         highlight = { enable = true },
         indent = { enable = true },
       }
@@ -225,7 +226,7 @@ local plugins = {
   -- FZF
   {
     'junegunn/fzf',
-    dir = '~/.fzf',
+    -- dir = '~/.fzf',
     build = './install --all',
     lazy = false,
   },

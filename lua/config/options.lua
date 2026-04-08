@@ -4,7 +4,7 @@ local opt = vim.opt
 local g = vim.g
 
 -- Python host program
-g.python3_host_prog = '/Users/jackson/miniforge3/bin/python'
+g.python3_host_prog = '/home/jhalpin/.conda/envs/basic/bin/python3'
 
 -- Disable Vi compatibility
 opt.compatible = false
