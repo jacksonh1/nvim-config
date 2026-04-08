@@ -100,6 +100,17 @@ vim.api.nvim_create_autocmd('FileType', {
 -- Disable c-u in insert mode (bind to nothing)
 keymap('i', '<C-u>', '<Nop>')
 
+-- Yank selection with file path for pasting into Claude Code
+keymap('v', '<leader>yp', function()
+  vim.cmd('normal! y')
+  local text = vim.fn.getreg('"')
+  local file = vim.fn.expand('%:.')  -- relative path
+  local line = vim.fn.line("'<")
+  local result = string.format('%s:%d\n```\n%s\n```', file, line, text)
+  vim.fn.setreg('+', result)
+  print('Yanked with path to clipboard')
+end, { desc = 'Yank with file path' })
+
 -- Cell navigation and creation macros
 keymap('n', '<Leader>m', 'i# %% [markdown]<Esc>', { desc = 'Insert markdown cell' })
 keymap('n', '<Leader>n', 'i# %%<Esc>', { desc = 'Insert code cell' })

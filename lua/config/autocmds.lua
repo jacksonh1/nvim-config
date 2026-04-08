@@ -60,6 +60,12 @@ autocmd('TermOpen', {
   end,
 })
 
+-- Check for file changes when focus is gained or cursor is held
+autocmd({ 'FocusGained', 'BufEnter', 'CursorHold' }, {
+  group = general,
+  callback = function() vim.cmd('checktime') end,
+})
+
 -- Python specific settings
 local python_group = augroup('Python', { clear = true })
 
