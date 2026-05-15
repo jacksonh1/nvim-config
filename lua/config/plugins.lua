@@ -282,16 +282,6 @@ local plugins = {
       -- Option 5: For X11 (Linux)
       -- repl_alternatives.setup_x11()
 
-      -- Add a keymap to open terminal and start IPython
-      vim.keymap.set('n', '<Leader>tt', function()
-        -- Open a vertical split with a terminal
-        vim.cmd('vsplit')
-        vim.cmd('terminal')
-        -- Send 'ipython --matplotlib' to the terminal
-        vim.defer_fn(function()
-          vim.api.nvim_feedkeys('iipython --matplotlib<CR>', 'n', false)
-        end, 100)
-      end, { desc = 'Open terminal with IPython' })
     end,
   },
 
