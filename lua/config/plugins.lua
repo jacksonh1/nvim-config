@@ -261,6 +261,10 @@ local plugins = {
   {
     'jpalardy/vim-slime',
     ft = 'python',
+    init = function()
+      vim.g.slime_target = 'neovim'
+      vim.g.slime_python_ipython = 1
+    end,
     config = function()
       -- Load alternative REPL configurations
       local repl_alternatives = require('config.repl-alternatives')
@@ -299,7 +303,7 @@ local plugins = {
       vim.keymap.set('n', '<Leader><Leader>b', ':IPythonCellInsertBelow<CR>', { desc = 'Insert cell below' })
       vim.keymap.set('n', '<Leader>i', '<Plug>SlimeLineSend', { desc = 'Send line to REPL' })
       vim.keymap.set('x', '<Leader>i', '<Plug>SlimeRegionSend', { desc = 'Send selection to REPL' })
-      vim.keymap.set('n', '<Leader><CR>', ':IPythonCellExecuteCellJump<CR>', { desc = 'Execute cell and jump' })
+      vim.keymap.set('n', '<Leader><CR>', ':IPythonCellExecuteCellVerboseJump<CR>', { desc = 'Execute cell and jump' })
     end,
   },
 
