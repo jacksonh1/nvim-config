@@ -80,8 +80,9 @@ opt.foldlevel = 99           -- Start with all folds open
 opt.listchars = {tab = '>-', trail = '_'}
 opt.list = true
 
--- Clipboard
-opt.clipboard = 'unnamedplus'
+-- Clipboard: OSC 52 copy is handled via TextYankPost autocmd in autocmds.lua.
+-- y/p use internal registers (no hanging); every yank is also sent to system clipboard.
+-- To paste from system clipboard into nvim, use kitty's ctrl+shift+v in insert mode.
 
 -- Update time for plugins
 opt.updatetime = 300
@@ -115,3 +116,7 @@ opt.writebackup = false
 
 -- Short messages
 opt.shortmess:append('c')
+
+-- Disable unused providers (not available on cluster)
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0

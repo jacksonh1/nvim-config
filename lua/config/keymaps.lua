@@ -108,7 +108,6 @@ keymap('v', '<leader>yp', function()
   local line = vim.fn.line("'<")
   local result = string.format('%s:%d\n```\n%s\n```', file, line, text)
   vim.fn.setreg('+', result)
-  print('Yanked with path to clipboard')
 end, { desc = 'Yank with file path' })
 
 -- Cell navigation and creation macros

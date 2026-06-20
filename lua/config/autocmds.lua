@@ -6,11 +6,13 @@ local augroup = vim.api.nvim_create_augroup
 -- General settings group
 local general = augroup('General', { clear = true })
 
--- Highlight on yank
+-- Highlight on yank + sync to system clipboard via OSC 52
 autocmd('TextYankPost', {
   group = general,
   callback = function()
     vim.highlight.on_yank({ higroup = 'Visual', timeout = 150 })
+    local copy = require('vim.ui.clipboard.osc52').copy('+')
+    copy(vim.v.event.regcontents, vim.v.event.regtype)
   end,
 })
 

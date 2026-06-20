@@ -85,6 +85,15 @@ local plugins = {
         },
       }
       vim.keymap.set('n', '<C-t>', ':Oil<CR>', { desc = 'Open Oil file manager' })
+      vim.keymap.set('n', '<C-e>', ':Oil<CR>', { desc = 'Open Oil file manager' })
+      vim.keymap.set('n', '<leader>yp', function()
+        local entry = require('oil').get_cursor_entry()
+        local dir = require('oil').get_current_dir()
+        if entry and dir then
+          local path = dir .. entry.name
+          vim.fn.setreg('+', path)
+        end
+      end, { desc = 'Yank filepath under cursor (oil)' })
     end,
   },
 
@@ -262,6 +271,13 @@ local plugins = {
   {
     'jpalardy/vim-slime',
     ft = 'python',
+    -- init runs before the plugin is sourced, so g:slime_target is visible to
+    -- config.vim's `if slime#config#resolve("target") == "neovim"` block which
+    -- populates neovim-specific defaults (neovim_ignore_unlisted, etc.).
+    init = function()
+      vim.g.slime_target = 'neovim'
+      vim.g.slime_python_ipython = 1
+    end,
     config = function()
       -- Load alternative REPL configurations
       local repl_alternatives = require('config.repl-alternatives')
@@ -282,17 +298,6 @@ local plugins = {
 
       -- Option 5: For X11 (Linux)
       -- repl_alternatives.setup_x11()
-
-      -- Add a keymap to open terminal and start IPython
-      vim.keymap.set('n', '<Leader>tt', function()
-        -- Open a vertical split with a terminal
-        vim.cmd('vsplit')
-        vim.cmd('terminal')
-        -- Send 'ipython --matplotlib' to the terminal
-        vim.defer_fn(function()
-          vim.api.nvim_feedkeys('iipython --matplotlib<CR>', 'n', false)
-        end, 100)
-      end, { desc = 'Open terminal with IPython' })
     end,
   },
 
@@ -302,7 +307,11 @@ local plugins = {
     dependencies = { 'jpalardy/vim-slime' },
     config = function()
       -- IPython cell mappings
-      vim.keymap.set('n', '<Leader><Leader>s', ':SlimeSend1 ipython --matplotlib<CR>', { desc = 'Start IPython' })
+      vim.keymap.set('n', '<Leader><Leader>s', function()
+        local prefix = vim.env.CONDA_PREFIX
+        local ipy = (prefix and prefix ~= '') and (prefix .. '/bin/ipython') or 'ipython'
+        vim.cmd('SlimeSend1 ' .. ipy .. ' --matplotlib')
+      end, { desc = 'Start IPython' })
       vim.keymap.set('n', '<Leader><Leader>c', ':IPythonCellClear<CR>', { desc = 'Clear IPython' })
       vim.keymap.set('n', '<Leader><Leader>x', ':IPythonCellClose<CR>', { desc = 'Close figures' })
       vim.keymap.set('n', '<Leader><Leader>r', ':IPythonCellRestart<CR>', { desc = 'Restart IPython' })
@@ -310,7 +319,7 @@ local plugins = {
       vim.keymap.set('n', '<Leader><Leader>b', ':IPythonCellInsertBelow<CR>', { desc = 'Insert cell below' })
       vim.keymap.set('n', '<Leader>i', '<Plug>SlimeLineSend', { desc = 'Send line to REPL' })
       vim.keymap.set('x', '<Leader>i', '<Plug>SlimeRegionSend', { desc = 'Send selection to REPL' })
-      vim.keymap.set('n', '<Leader><CR>', ':IPythonCellExecuteCellJump<CR>', { desc = 'Execute cell and jump' })
+      vim.keymap.set('n', '<Leader><CR>', ':IPythonCellExecuteCellVerboseJump<CR>', { desc = 'Execute cell and jump' })
     end,
   },
 
@@ -388,6 +397,9 @@ local plugins = {
 require('lazy').setup(plugins, {
   ui = {
     border = 'rounded',
+  },
+  rocks = {
+    enabled = false,  -- luarocks/hererocks not available on cluster
   },
   performance = {
     rtp = {
