@@ -4,6 +4,37 @@ Steps taken to get this config working on the ORCD engaging cluster (Rocky Linux
 
 ---
 
+## 0. Multi-Machine Setup (one shared `main` branch)
+
+This config is shared between two machines on a **single `main` branch** in
+`github.com/jacksonh1/nvim-config`:
+
+- **macOS laptop** — primary dev machine
+- **ORCD cluster** — this machine (Linux, used over SSH)
+
+The goal: develop on either machine, `git pull` on the other, and have it just
+work — no per-machine copy/paste, and a GitHub backup of everything.
+
+**How it works:** `lua/config/host.lua` detects the machine (`vim.fn.has('mac')`)
+and exposes `host.is_mac` / `host.is_cluster`. Only the handful of genuinely
+machine-specific values branch on these flags; everything else is shared. The
+machine-specific spots are:
+
+| Setting | Laptop (`is_mac`) | Cluster (`is_cluster`) | File |
+|---------|-------------------|------------------------|------|
+| `python3_host_prog` | `/Users/jackson/miniforge3/bin/python` | `/home/jhalpin/.conda/envs/basic/bin/python3` | `options.lua` |
+| Clipboard | `unnamedplus` (native) | OSC 52 via `TextYankPost` autocmd | `options.lua`, `autocmds.lua` |
+
+Everything else (slime/IPython fixes, treesitter, providers, oil keymaps, etc.)
+is shared and applies on both machines.
+
+**Workflow:** `git pull` to get the other machine's changes, `git push` to back
+up / share. No force-push needed — the two histories were reconciled into one
+`main`. When adding something machine-specific, branch on `host.is_mac` rather
+than hardcoding, so both machines stay working.
+
+---
+
 ## 1. Install Neovim from Source
 
 The community module (`module load neovim/0.11.0`) has another user's build paths
@@ -50,14 +81,13 @@ conda install -n basic -c conda-forge nodejs
 
 ### `lua/config/options.lua`
 
-Fix the hardcoded macOS Python path:
+The Python host path is machine-specific, so it branches on `host.is_mac`
+(see section 0) instead of being hardcoded:
 
 ```lua
--- Before (macOS path, doesn't exist on cluster):
-g.python3_host_prog = '/Users/jackson/miniforge3/bin/python'
-
--- After:
-g.python3_host_prog = '/home/jhalpin/.conda/envs/basic/bin/python3'
+g.python3_host_prog = host.is_mac
+  and '/Users/jackson/miniforge3/bin/python'
+  or '/home/jhalpin/.conda/envs/basic/bin/python3'
 ```
 
 ### `lua/config/plugins.lua` — FZF plugin
@@ -205,30 +235,33 @@ rocks = {
 },
 ```
 
-### `lua/config/options.lua` — OSC 52 clipboard (works over SSH via kitty)
+### OSC 52 clipboard (cluster only — works over SSH via kitty)
 
-Replace the plain `opt.clipboard = 'unnamedplus'` line with:
+This is machine-specific (see section 0). On the laptop, `options.lua` sets
+`opt.clipboard = 'unnamedplus'` for the native system clipboard. On the cluster
+that line is skipped; instead, every yank is pushed to the system clipboard via
+OSC 52 from the `TextYankPost` autocmd in `autocmds.lua`:
 
 ```lua
-vim.g.clipboard = {
-  name = 'OSC 52',
-  copy = {
-    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-  },
-  paste = {
-    ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-  },
-}
-opt.clipboard = 'unnamedplus'
+-- lua/config/autocmds.lua (inside the TextYankPost callback)
+if host.is_cluster then
+  local copy = require('vim.ui.clipboard.osc52').copy('+')
+  copy(vim.v.event.regcontents, vim.v.event.regtype)
+end
+```
+
+```lua
+-- lua/config/options.lua
+if host.is_mac then
+  opt.clipboard = 'unnamedplus'
+end
 ```
 
 This uses the OSC 52 terminal escape sequence, which kitty supports natively. No
-X11 forwarding required. OSC 52 paste reads hang over SSH, so paste is disabled —
-`y`/`p` use neovim's internal registers. Use `"+y` to explicitly copy to your local
-system clipboard. To paste from system clipboard into neovim, use kitty's
-`ctrl+shift+v` in insert mode.
+X11 forwarding required. OSC 52 paste reads hang over SSH, so paste is *not*
+wired up — `y`/`p` use neovim's internal registers, while every yank is still
+mirrored to your local system clipboard automatically. To paste from the system
+clipboard into neovim, use kitty's `ctrl+shift+v` in insert mode.
 
 ### Known remaining warnings after the above
 

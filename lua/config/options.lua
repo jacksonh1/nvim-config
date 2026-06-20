@@ -2,9 +2,12 @@
 
 local opt = vim.opt
 local g = vim.g
+local host = require('config.host')
 
--- Python host program
-g.python3_host_prog = '/home/jhalpin/.conda/envs/basic/bin/python3'
+-- Python host program (machine-specific)
+g.python3_host_prog = host.is_mac
+  and '/Users/jackson/miniforge3/bin/python'
+  or '/home/jhalpin/.conda/envs/basic/bin/python3'
 
 -- Disable Vi compatibility
 opt.compatible = false
@@ -80,9 +83,15 @@ opt.foldlevel = 99           -- Start with all folds open
 opt.listchars = {tab = '>-', trail = '_'}
 opt.list = true
 
--- Clipboard: OSC 52 copy is handled via TextYankPost autocmd in autocmds.lua.
--- y/p use internal registers (no hanging); every yank is also sent to system clipboard.
--- To paste from system clipboard into nvim, use kitty's ctrl+shift+v in insert mode.
+-- Clipboard (machine-specific)
+-- Laptop (macOS): native system clipboard via unnamedplus.
+-- Cluster (over SSH): OSC 52 copy is handled via the TextYankPost autocmd in
+--   autocmds.lua instead -- y/p use internal registers (no SSH paste hang) and
+--   every yank is also sent to the system clipboard. To paste from the system
+--   clipboard into nvim, use kitty's ctrl+shift+v in insert mode.
+if host.is_mac then
+  opt.clipboard = 'unnamedplus'
+end
 
 -- Update time for plugins
 opt.updatetime = 300

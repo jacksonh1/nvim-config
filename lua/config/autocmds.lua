@@ -2,17 +2,21 @@
 
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
+local host = require('config.host')
 
 -- General settings group
 local general = augroup('General', { clear = true })
 
--- Highlight on yank + sync to system clipboard via OSC 52
+-- Highlight on yank. On the cluster (over SSH) also sync the yank to the system
+-- clipboard via OSC 52; on the laptop the unnamedplus clipboard handles this.
 autocmd('TextYankPost', {
   group = general,
   callback = function()
     vim.highlight.on_yank({ higroup = 'Visual', timeout = 150 })
-    local copy = require('vim.ui.clipboard.osc52').copy('+')
-    copy(vim.v.event.regcontents, vim.v.event.regtype)
+    if host.is_cluster then
+      local copy = require('vim.ui.clipboard.osc52').copy('+')
+      copy(vim.v.event.regcontents, vim.v.event.regtype)
+    end
   end,
 })
 
