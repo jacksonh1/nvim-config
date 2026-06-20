@@ -352,15 +352,15 @@ local plugins = {
 
   -- File manager
   {
-    'ptzz/lf.vim',
-    lazy = false,
-    dependencies = { 'voldikss/vim-floaterm' },
+    'mikavilpas/yazi.nvim',
+    event = 'VeryLazy',
     keys = {
-      { '<leader>o', ':Lf<CR>', desc = 'Open lf file manager' },
+      { '<leader>o', '<cmd>Yazi<cr>', desc = 'Open yazi at current file' },
+      { '<leader>cw', '<cmd>Yazi cwd<cr>', desc = 'Open yazi in working directory' },
     },
-    config = function()
-      vim.g.lf_map_keys = 0
-    end,
+    opts = {
+      open_for_directories = false,
+    },
   },
 
   {
